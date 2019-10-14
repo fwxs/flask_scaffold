@@ -57,6 +57,7 @@ mkdir -p app/main app/main/model app/main/controller app/main/service app/test
 echo "[*] Creating __init__.py files"
 touch app/__init__.py
 touch app/main/__init__.py
+touch app/main/model/__init__.py
 touch app/main/controller/__init__.py
 touch app/main/service/__init__.py
 touch app/test/__init__.py
@@ -65,7 +66,7 @@ echo "[*] Dumping requirements.txt"
 pip freeze > requirements.txt
 
 
-echo "[*] Final file structure."
-ls -lR
+echo "[*] Directory structure."
+ls -R
 
 
