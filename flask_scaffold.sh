@@ -1,72 +1,113 @@
 #!/bin/bash
 
 # AUTHOR fwxs
-# VERSION 1.0 
+# VERSION 1.1
 
-echo "[*] Setting up a virtual environment."
-python -c 'import venv'
+function set_venv {
+	echo "[*] Setting up the virtual environment."
+	python -c 'import venv'
 
-if [[ $? != 0 ]]; then
-	echo "[!] Venv is not installed... Installing."
-	pip install venv;
-else
-	python -m venv .venv
-	touch .env
+	if [[ $? != 0 ]]; then
+		echo "[!] Venv is not installed... Installing."
+		pip install venv;
+	else
+		python -m venv .venv
+		touch .env
 
-	echo '
-	if [[ ! -v VIRTUAL_ENV ]]; then
-		source .venv/bin/activate
+		echo '
+		if [[ ! -v VIRTUAL_ENV ]]; then
+			source .venv/bin/activate
+		fi
+		' > .env;
 	fi
-	' > .env;
+}
+
+function update_pip {
+	echo "[*] Updating pip."
+	pip install --upgrade pip
+}
+
+function activate_source {
+	echo "[*] Changing source."
+	source .venv/bin/activate
+}
+
+function set_flask_application_factory_scaffold {
+	dirs=("app" "app/main" "app/main/model" "app/main/controller" "app/main/service" "test")
+
+	echo "[*] Creating a flask functional environment."
+	mkdir -p "${dirs[@]}"
+
+	for directory in "${dirs[@]}"; do
+		pushd $directory > /dev/null
+		touch __init__.py
+		popd > /dev/null
+	done
+}
+
+function install_flask {
+	echo -n "[*] Install flask (y/n): "
+	read install
+
+	case $install in
+		y|Y)
+			echo "[*] Installing flask, flask testing."
+			pip install flask flask_testing
+
+			echo "[*] Set application factory structure? (y/n)"
+			read setAppFactory
+
+			case $setAppFactory in
+				y|Y)
+					set_flask_application_factory_scaffold
+					;;
+				*)
+					;;
+			esac
+			;;
+		*)
+			;;
+	esac
+}
+
+function dump_requirements {
+	echo "[*] Dumping requirements.txt"
+	pip freeze > requirements.txt
+}
+
+function usage {
+	echo "${0##*/} <dir name>"
+}
+
+function init_repo {
+	git init .
+	touch README.md
+}
+
+if [[ $# == 0 ]]; then
+	usage 
+	return 1 2> /dev/null || exit 1
 fi
 
-echo "[*] Changing source."
-source .venv/bin/activate
+echo "[*] Creating env in $1"
+mkdir $1
+cd $1
 
-echo "[*] Updating pip."
-pip install --upgrade pip
+set_venv
+activate_source
+update_pip
+install_flask
+dump_requirements
 
-echo -n "[*] Install flask (y/n): "
-read installFlask
+echo "[*] Initialize repository? (y/n)"
+read initRepo
 
-case $installFlask in
+case $initRepo in
 	y|Y)
-		echo "[*] Installing flask, flask testing and flask-restplus."
-		pip install flask flask_testing flask-restplus
-
-		echo -n "[*] Install optional libraries (Migrate, pyjwt, bcrypt, Script, SQLAlchemy) (y/n): "
-		read optionalLibraries
-
-		case $optionalLibraries in
-			y|Y)
-				echo "[*] Installing optional libraries."
-				pip install flask-bcrypt Flask-Migrate Flask-Script pyjwt Flask-SQLAlchemy
-				;;
-			*)
-				;;
-		esac
+		init_repo
 		;;
 	*)
 		;;
 esac
 
-
-echo "[*] Creating a flask functional environment."
-mkdir -p app/main app/main/model app/main/controller app/main/service app/test
-
-echo "[*] Creating __init__.py files"
-touch app/__init__.py
-touch app/main/__init__.py
-touch app/main/model/__init__.py
-touch app/main/controller/__init__.py
-touch app/main/service/__init__.py
-touch app/test/__init__.py
-
-echo "[*] Dumping requirements.txt"
-pip freeze > requirements.txt
-
-
-echo "[*] Directory structure."
-ls -R
-
-
+cd ..
