@@ -3,14 +3,6 @@
 # AUTHOR fwxs
 # VERSION 1.1
 
-VENV_FILE_CONTENT='
-if [[ ! -v VIRTUAL_ENV ]]; then
-	FLASK_ENV="development"
-	FLASK_APP=""
-	source .venv/bin/activate
-fi
-'
-
 function set_venv {
 	echo "[*] Setting up the virtual environment."
 	python -c 'import venv'
@@ -22,7 +14,12 @@ function set_venv {
 		python -m venv .venv
 		touch .env
 
-		echo VENV_FILE_CONTENT > .env;
+		echo "
+if [[ ! -v VIRTUAL_ENV ]]; then
+	FLASK_ENV='development'
+	FLASK_APP=''
+	source .venv/bin/activate
+fi" > .env;
 		cp .env .env.example
 	fi
 }
