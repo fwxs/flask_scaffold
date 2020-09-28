@@ -126,4 +126,4 @@ if [[ $# == 0 ]]; then
 	return 1 2> /dev/null || exit 1
 fi
 
-set_flask_environment
+set_flask_environment $1
